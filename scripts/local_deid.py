@@ -15,6 +15,7 @@ from pydicom.filewriter import dcmwrite
 from pydicom.misc import is_dicom
 
 from dicom_deid.pixel_deid import DicomPixelRedactor
+from dicom_deid.manifest_creation import create_manifest
 
 
 # --- Keep Tags (normalized names) ---
@@ -117,7 +118,7 @@ def process_file(
     new_filename = f"{deid_acc}_{sop_uid}.dcm"
     deid_parts.append(new_filename)
 
-    output_path = os.path.join(output_base_dir, *deid_parts)
+    output_path = os.path.join(str(output_base_dir / "deidentified_images"), *deid_parts)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # Replace identifying tags
@@ -205,7 +206,6 @@ def process_file(
     print(f"   ❌ Wiped Tags: {wiped_tags}")
 
 
-
 def main(config_pth):
     # Check that config path exists
     config_pth = Path(config_pth).resolve(strict=True)
@@ -213,13 +213,16 @@ def main(config_pth):
         config = yaml.safe_load(f)
 
     # --- Configuration ---
-
-    input_dir = config["input_dir"]
-    output_base_dir = config["output_base_dir"]
-    csv_output_manifest = config["csv_output_manifest"]
-    manifest_path = config["manifest_path"]
-
+    input_dir = Path(config["input_dir"])
+    output_base_dir = Path(config["output_base_dir"])
     redaction = config["redaction_mode"] 
+
+    # Derived paths
+    manifest_path = output_base_dir / "manifest_path.csv"
+    csv_output_manifest = output_base_dir / "csv_output_manifest.csv"
+
+    # Create manifest
+    create_manifest(input_dir, manifest_path)
 
     # --- UID generator class ---
     class UIDGenerator:

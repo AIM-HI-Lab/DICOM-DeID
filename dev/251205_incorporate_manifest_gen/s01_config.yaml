@@ -1,6 +1,11 @@
 # config.yaml
-input_dir: "/home/hellern/isilon/data/weaver_projects/request_176"
-manifest_path: "/home/hellern/isilon/data/weaver_projects/request_176_accession_map.csv"
-output_base_dir: "/home/hellern/isilon/data/weaver_projects/request_176_deid_v2_demo"
-csv_output_manifest: "/home/hellern/isilon/data/weaver_projects/request_176_deid_log_demo.csv"
+
+# The mode to use for pixel redaction: "Full" or "Smart"
 redaction_mode: "Smart"
+
+# The location of our identified images
+input_dir: "/home/hellern/isilon/data/weaver_projects/request_176"
+
+# The location to write the output data
+output_base_dir: "/home/hellern/isilon/data/weaver_projects/request_176_deid_v2_demo_v2"
+
