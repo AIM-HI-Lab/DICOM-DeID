@@ -1,0 +1,2 @@
+legacy_logs/*.txt
+**/*__pycache__*
