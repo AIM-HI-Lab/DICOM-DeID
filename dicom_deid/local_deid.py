@@ -12,8 +12,9 @@ from pydicom.uid import generate_uid
 from pydicom.dataset import FileMetaDataset
 from pydicom.uid import ExplicitVRLittleEndian
 from pydicom.filewriter import dcmwrite
-from pixel_deid import DicomPixelRedactor
 from pydicom.misc import is_dicom
+
+from dicom_deid.pixel_deid import DicomPixelRedactor
 
 
 # --- Keep Tags (normalized names) ---
