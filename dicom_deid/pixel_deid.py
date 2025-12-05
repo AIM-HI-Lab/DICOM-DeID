@@ -1,9 +1,10 @@
-import numpy as np
 import cv2
 import easyocr
 import pydicom
-from pydicom.uid import ExplicitVRLittleEndian
+import numpy as np
 from pydicom.filewriter import dcmwrite
+from pydicom.uid import ExplicitVRLittleEndian
+
 
 class DicomPixelRedactor:
     def __init__(self, redaction_mode="Full"):
