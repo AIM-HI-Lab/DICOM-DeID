@@ -221,7 +221,11 @@ def main(config_pth):
     manifest_path = output_base_dir / "manifest_path.csv"
     csv_output_manifest = output_base_dir / "csv_output_manifest.csv"
 
+    # Create output base directory
+    (output_base_dir / "deidentified_images").mkdir(exist_ok=True, parents=True)
+
     # Create manifest
+    print("🗂️  Creating manifest...")
     create_manifest(input_dir, manifest_path)
 
     # --- UID generator class ---
