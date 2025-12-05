@@ -1,10 +1,13 @@
 import os
 import hashlib
+from pathlib import Path
+from datetime import datetime
+from argparse import ArgumentParser
+
+import yaml
 import pydicom
 import pandas as pd
 from tqdm import tqdm
-import yaml
-from datetime import datetime
 from pydicom.uid import generate_uid
 from pydicom.dataset import FileMetaDataset
 from pydicom.uid import ExplicitVRLittleEndian
@@ -202,8 +205,10 @@ def process_file(
 
 
 
-def main():
-    with open("de_id_config.yaml", "r") as f:
+def main(config_pth):
+    # Check that config path exists
+    config_pth = Path(config_pth).resolve(strict=True)
+    with config_pth.open("r") as f:
         config = yaml.safe_load(f)
 
     # --- Configuration ---
@@ -265,8 +270,15 @@ def main():
     # --- Save Output CSV Manifest ---
     pd.DataFrame(output_manifest).to_csv(csv_output_manifest, index=False)
     print(f"\n✅ Complete. Manifest written to: {csv_output_manifest}")
-    
-    
-if __name__ == "__main__":
-    main()
 
+
+if __name__ == "__main__":
+    parser = ArgumentParser(description="Locally de-identify DICOM files based on a manifest.")
+    parser.add_argument(
+        "-c", "--config",
+        type=str,
+        required=True,
+        help="Path to YAML configuration file."
+    )
+    args = parser.parse_args()
+    main(args.config)
