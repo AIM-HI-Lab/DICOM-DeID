@@ -15,7 +15,7 @@
 # #SBATCH --gres=gpu:1
 
 # User-specific code path
-export CODE_PATH="/home/${USER}/isilon/code/ccf"
+export CODE_PATH="~/AIM-HI-Lab/code/${USER}"
 
 # Load virtualenv for this project (also user specific)
 source ~/isilon/env/peds-3.9/bin/activate

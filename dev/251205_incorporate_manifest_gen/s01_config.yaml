@@ -4,8 +4,8 @@
 redaction_mode: "Smart"
 
 # The location of our identified images
-input_dir: "/home/hellern/AIM-HI-Lab/research-projects/weaver/request_176_smol"
+input_dir: "~/AIM-HI-Lab/research-projects/weaver/request_176_smol"
 
 # The location to write the output data
-output_base_dir: "/home/hellern/AIM-HI-Lab/research-projects/weaver/request_176_deid_nh"
+output_base_dir: "~/AIM-HI-Lab/research-projects/weaver/request_176_deid_nh"
 
