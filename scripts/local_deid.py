@@ -115,11 +115,16 @@ def process_file(
         deid_parts.append(folder_uid_map[part])  
 
     sop_uid = uid_gen.generate()
-    new_filename = f"{deid_acc}_{sop_uid}.dcm"
-    deid_parts.append(new_filename)
+    base_name = f"{deid_acc}_{sop_uid}"
 
-    output_path = os.path.join(str(output_base_dir / "deidentified_images"), *deid_parts)
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    dicom_output_path = os.path.join(
+        str(output_base_dir / "deidentified_dicoms"), *deid_parts, f"{base_name}.dcm"
+    )
+    png_output_path = os.path.join(
+        str(output_base_dir / "deidentified_pngs"), *deid_parts, f"{base_name}.png"
+    )
+    os.makedirs(os.path.dirname(dicom_output_path), exist_ok=True)
+    os.makedirs(os.path.dirname(png_output_path), exist_ok=True)
 
     # Replace identifying tags
     ds.AccessionNumber = deid_acc
@@ -183,12 +188,13 @@ def process_file(
     ###ds.save_as(output_path)  ### old
     # Scrubbing and tag editing...
     print("about to redact")
-    redactor.redact(ds, output_path)
+    redactor.redact(ds, dicom_output_path, png_output_path=png_output_path)
 
 
     output_manifest.append({
         "original_path": full_path,
-        "deid_path": output_path,
+        "deid_path": dicom_output_path,
+        "deid_png_path": png_output_path,
         "original_accession": accession,
         "deid_accession": deid_acc,
         "study_uid": ds.StudyInstanceUID,
@@ -201,7 +207,7 @@ def process_file(
         "PatientID": ds.PatientID
     })
 
-    print(f"\n📄 {full_path} → {output_path}")
+    print(f"\n📄 {full_path} → {dicom_output_path}")
     print(f"   ✅ Kept Tags: {kept_tags}")
     print(f"   ❌ Wiped Tags: {wiped_tags}")
 
@@ -221,8 +227,9 @@ def main(config_pth):
     manifest_path = output_base_dir / "manifest_path.csv"
     csv_output_manifest = output_base_dir / "csv_output_manifest.csv"
 
-    # Create output base directory
-    (output_base_dir / "deidentified_images").mkdir(exist_ok=True, parents=True)
+    # Create output directories
+    (output_base_dir / "deidentified_dicoms").mkdir(exist_ok=True, parents=True)
+    (output_base_dir / "deidentified_pngs").mkdir(exist_ok=True, parents=True)
 
     # Create manifest
     print("🗂️  Creating manifest...")

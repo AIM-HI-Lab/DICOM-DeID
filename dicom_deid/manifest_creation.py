@@ -27,6 +27,6 @@ def create_manifest(input_pth: Path, output_pth: Path):
 
     # Write the accession map to a CSV file
     with open(output_pth, "w") as f:
-        f.write("accession_num, subject_id\n")
+        f.write("accession_num,subject_id\n")
         for accession_number, uuid in accession_map.items():
             f.write(f"{accession_number},{uuid}\n")

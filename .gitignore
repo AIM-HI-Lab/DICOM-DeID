@@ -1,2 +1,4 @@
+dev/*/logs/*
 legacy_logs/*.txt
 **/*__pycache__*
+*.egg-info

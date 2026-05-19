@@ -1,6 +1,7 @@
+import os
+
 import cv2
 import easyocr
-import pydicom
 import numpy as np
 from pydicom.filewriter import dcmwrite
 from pydicom.uid import ExplicitVRLittleEndian
@@ -15,7 +16,7 @@ class DicomPixelRedactor:
             'sagittal', 'sag', 'transverse', 'trans', 'prone'
         ]
 
-    def redact(self, ds, output_path):
+    def redact(self, ds, output_path, png_output_path=None):
         print("🕵️ Starting redaction")
 
         if "PixelData" not in ds:
@@ -60,8 +61,30 @@ class DicomPixelRedactor:
 
             dcmwrite(output_path, ds, write_like_original=False)
             print(f"✅ Redacted DICOM saved to: {output_path}")
+
+            if png_output_path:
+                self._save_png_preview(redacted_array, samples, frames, png_output_path)
         except Exception as e:
             print(f"❌ Failed to save redacted DICOM: {e}")
+
+    def _frame_to_bgr(self, img, samples):
+        if samples == 1:
+            if img.dtype != np.uint8:
+                img_norm = cv2.normalize(img.astype(np.float32), None, 0, 255, cv2.NORM_MINMAX)
+                img_uint8 = np.uint8(img_norm)
+            else:
+                img_uint8 = img
+            return cv2.cvtColor(img_uint8, cv2.COLOR_GRAY2BGR)
+        return img.astype(np.uint8)
+
+    def _save_png_preview(self, array, samples, frames, png_path):
+        frame = array[0] if frames > 1 else array
+        bgr = self._frame_to_bgr(frame, samples)
+        os.makedirs(os.path.dirname(png_path), exist_ok=True)
+        if cv2.imwrite(png_path, bgr):
+            print(f"✅ PNG preview saved to: {png_path}")
+        else:
+            print(f"⚠️ Failed to write PNG preview: {png_path}")
 
     def redact_frame(self, img, samples):
         try:
