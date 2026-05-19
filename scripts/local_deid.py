@@ -18,6 +18,20 @@ from dicom_deid.pixel_deid import DicomPixelRedactor
 from dicom_deid.manifest_creation import create_manifest
 
 
+def resolve_config_path(path_value, *, label: str) -> Path:
+    """Expand ~ and environment variables, then return an absolute path."""
+    if path_value is None or (isinstance(path_value, str) and not path_value.strip()):
+        raise ValueError(
+            f"Missing or empty '{label}' in config. "
+            "Set a folder path (for example: ~/AIM-HI-Lab/research-projects/my_study)."
+        )
+    if not isinstance(path_value, (str, os.PathLike)):
+        raise ValueError(f"'{label}' must be a path string, not {type(path_value).__name__}.")
+
+    expanded = os.path.expandvars(os.path.expanduser(str(path_value).strip()))
+    return Path(expanded).resolve()
+
+
 # --- Keep Tags (normalized names) ---
 KEEP_TAGS = set([
     'AcquisitionMatrix', 'AngioFlag', 'BurnedInAnnotation', 'CodeMeaning', 'CodeValue',
@@ -213,15 +227,34 @@ def process_file(
 
 
 def main(config_pth):
-    # Check that config path exists
-    config_pth = Path(config_pth).resolve(strict=True)
+    config_pth = resolve_config_path(config_pth, label="config file")
+    if not config_pth.is_file():
+        raise FileNotFoundError(f"Config file not found: {config_pth}")
+
     with config_pth.open("r") as f:
-        config = yaml.safe_load(f)
+        config = yaml.safe_load(f) or {}
+
+    required_keys = ("input_dir", "output_base_dir", "redaction_mode")
+    missing = [key for key in required_keys if key not in config or config[key] is None]
+    if missing:
+        raise ValueError(
+            f"Config is missing required keys: {', '.join(missing)}. "
+            f"Expected keys: {', '.join(required_keys)}."
+        )
 
     # --- Configuration ---
-    input_dir = Path(config["input_dir"])
-    output_base_dir = Path(config["output_base_dir"])
-    redaction = config["redaction_mode"] 
+    input_dir = resolve_config_path(config["input_dir"], label="input_dir")
+    output_base_dir = resolve_config_path(config["output_base_dir"], label="output_base_dir")
+    redaction = config["redaction_mode"]
+
+    if not input_dir.is_dir():
+        raise FileNotFoundError(
+            f"input_dir does not exist or is not a folder:\n  {input_dir}\n"
+            f"(from config value: {config['input_dir']!r})"
+        )
+
+    print(f"📂 input_dir:       {input_dir}")
+    print(f"📂 output_base_dir: {output_base_dir}")
 
     # Derived paths
     manifest_path = output_base_dir / "manifest_path.csv"
