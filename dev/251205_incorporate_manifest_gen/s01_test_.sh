@@ -8,7 +8,7 @@
 #SBATCH --error=dev/251205_incorporate_manifest_gen/logs/s01_err.txt
 
 # If CPU job:
-#SBATCH -p defq,xtreme,bigmem
+#SBATCH -p xtreme
 
 # If GPU job:
 # #SBATCH -p gpu,gpu-a100,gpu-h100
